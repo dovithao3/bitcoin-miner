@@ -7,31 +7,51 @@
   <title>Bitcoin Mining</title>
   <script src='./bundle.js'></script>
   <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/layout.css">
 </head>
 <body>
-<button id='start-mining'>Start Mining</button>
-<button id='pause-mining'>Pause Mining</button>
-<p id='bestHash'></p>
-<p id='target'></p>
+  <div class='main-content'>
+    <div class='mining-container'>
+      <button id='restart-mining'>Go!</button>
+      <button id='pause-mining'>Pause/Restart</button>
+      <p id='bestHash'></p>
+      <p id='target'></p>
 
-<p id='version'></p>
-<p id='prevHash'></p>
-<p id='merkleRoot'></p>
-<p id='timeStamp'></p>
-<p id='bits'></p>
+      <p id='version'></p>
+      <p id='prevHash'></p>
+      <p id='merkleRoot'></p>
+      <p id='timeStamp'></p>
+      <p id='bits'></p>
 
-<p id='nonce'></p>
-<p id='currentHash'></p>
-  
-<p id='bestNonce'></p>
+      <p id='nonce'></p>
+      <p id='currentHash'></p>
+        
+      <p id='bestNonce'></p>
+    </div>
 
-<div id='merkle-tree'></div>
-<br>
+    <div id='transactions-modal' class='modal'>
+      <div class='transactions-page'>
+        <section class='tx-list-container'>
+          <button id='calc-merkle'>Calculate Merkle Root</button>
+          <ul id='tx-list'></ul>
+        </section>
+        <section class='transactions-container'>
+          <button id='start-stream'>Start Live Transactions</button>
+          <button id='stop-stream'>Stop Live Transactions</button>
+          <ul id="tx-stream"></ul>
+        </section>
+      </div>
+    </div>
 
-<button id='start-stream'>Start Transaction Stream</button>
-<button id='stop-stream'>Stop Transaction Stream</button>
-<ul id="tx-stream"></ul>
-
-  
+    <div id='merkle-modal' class='modal hidden'>
+      <button id='start-mining'>Start Mining</button>
+      <div class='merkle-tree-container'>
+        <ul id='merkle-row-4' class='merkle-row'></ul>
+        <ul id='merkle-row-3' class='merkle-row'></ul>
+        <ul id='merkle-row-2' class='merkle-row'></ul>
+        <ul id='merkle-row-1' class='merkle-row'></ul>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

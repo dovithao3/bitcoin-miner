@@ -1,14 +1,16 @@
 import sha256 from 'js-sha256';
 import anime from 'animejs';
 
-const MAX_STREAM_TX = 10; // number of transactions in stream panel
+const MAX_STREAM_TX = 7; // number of transactions in stream panel
 const MAX_TX = 8; // maximum number of transaction to include in block
 const BLOCK_REWARD = 12.5; // current reward for mining block (in BTC)
+let merkleRoot; // merkle root of merkle tree
 
 document.addEventListener('DOMContentLoaded', () => {
-  const startMiningButton = document.getElementById('start-mining');
+  const restartMiningButton = document.getElementById('restart-mining');
   const pauseMiningButton = document.getElementById('pause-mining');
   const startStreamButton = document.getElementById('start-stream');
+  const drawMerkleButton = document.getElementById('calc-merkle');
   
   const versionEl = document.getElementById('version');
   const pevHashEl = document.getElementById('prevHash');
@@ -23,28 +25,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const version = '00000001';
   const prevHash = '0000000000000000000000000000000000000000000000000000000000000000';
-  const merkleRoot = '4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b';
+  // const merkleRoot = '4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b';
   const timeStamp = Math.floor(Date.parse('2009-01-03 18:15:05 GMT')/1000).toString(16);
   const bits = 486604799; // decimal representation
   const bitsHex = bits.toString(16);
   const target = calculateTarget(bits);
 
   let nonce = 0, bestNonce, bestHash, miningOn = true; // actual nonce = 2083236893
-  const transactions = Array(MAX_TX - 1); // elements are HTML elements with data fields
+  const transactions = []; // elements are objects
 
   const a = Date.now();
   
-  startStreamButton.addEventListener('click', () => transactionStream(transactions));
-  startMiningButton.addEventListener('click', () => requestAnimationFrame(loop));
+  restartMiningButton.addEventListener('click', () => requestAnimationFrame(loop));
   pauseMiningButton.addEventListener('click', () => pauseMining());
+  
+  // start drawing transactions modal
+  transactionStream(transactions, drawMerkleButton);
+  calculatePaymentTx(transactions); // fills first transaction
+  drawTxList(transactions);
+  startStreamButton.addEventListener('click', () => 
+    transactionStream(transactions, drawMerkleButton));
 
   function loop() {
-    anime({
-      targets: versionEl,
-      translateX: 250,
-      duration: 1000,
-      loop: 3,
-    });
+    // anime({
+    //   targets: versionEl,
+    //   translateX: 250,
+    //   duration: 1000,
+    //   loop: 3,
+    // });
 
     if (miningOn) {
       nonce++;
@@ -61,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     bitsHexEl.textContent = 'Bits (Difficulty): ' + bitsHex;
     nonceHexEl.textContent = 'Nonce: ' + nonce;
     targetEl.textContent = 'Target: ' + target;
-    drawMerkleTree(transactions);
+    drawTxList(transactions);
   }
 
   function hashHeader() {
@@ -91,10 +99,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-function transactionStream(transactions) {
-  let btcs = new WebSocket('wss://ws.blockchain.info/inv');
+function transactionStream(transactions, drawMerkleButton) {
+  const btcs = new WebSocket('wss://ws.blockchain.info/inv');
   btcs.onopen = () => btcs.send(JSON.stringify({op: 'unconfirmed_sub'}));
 
+  drawMerkleButton.addEventListener('click', () => drawMerkleTree(btcs, transactions));
   const stopStreamButton = document.getElementById('stop-stream');
   stopStreamButton.addEventListener('click', () => {
     btcs.send(JSON.stringify({op: 'unconfirmed_unsub'}));
@@ -107,23 +116,26 @@ function transactionStream(transactions) {
     const txHash = res.x.hash;
     const valueIn = res.x.inputs.reduce((sum, el) => sum + el.prev_out.value, 0);
     const valueOut = res.x.out.reduce((sum, el) => sum + el.value, 0);
-    const fee = valueIn - valueOut;
+    const fee = valueIn - valueOut; // in Satoshi's
     id = (id + 1) % MAX_STREAM_TX;
     
     const newTx = document.createElement('li');
     newTx.setAttribute('id', 'tx-' + id);
-    newTx.dataset.hash = txHash;
-    newTx.dataset.valueIn = valueIn;
-    newTx.dataset.fee = fee;
-    // newTx.addEventListener('click', () => addTxToBlock(newTx, transactions));
-
+    
     let txInnerHtml = `Hash: <a href='https://blockchain.info/tx/${txHash}' target='_blank'>
       ${txHash}</a>
-      <br>Value In: ${valueIn}
-      <br>Value Out: ${valueOut}
-      <br>Fee: ${fee}`;
+      <br>Transaction Amount: ${valueOut / 1e8} BTC
+      <br>Transaction Fee: ${fee / 1e8} BTC
+      <br>`;
+  
+    const addTxButton = document.createElement('button');
+    addTxButton.textContent = 'Add to Block';
+    addTxButton.addEventListener('click', () => addTxToBlock(
+      { hash: txHash, fee }, newTx, transactions)
+    );
 
     newTx.innerHTML = txInnerHtml;
+    newTx.appendChild(addTxButton);
 
     const streamEl = document.getElementById('tx-stream');
     const tx = document.getElementById(`tx-${id}`);
@@ -135,14 +147,25 @@ function transactionStream(transactions) {
   };
 }
 
-function addTxToBlock(txEl, transactions) {
-  transactions[txEl.dataset.id] = txEl;
+function addTxToBlock(txObj, txEl, transactions) {
+  if (transactions.length < MAX_TX) {
+    transactions.push(txObj);
+    txEl.classList.add('hidden');
+    drawTxList(transactions);
+  }
 }
 
-function drawMerkleTree(transactions) {
-  const merkleTreeEl = document.getElementById('merkle-tree');
-  merkleTreeEl.textContent = 'Payment Transaction Hash: ' 
-    + calculatePaymentTx(transactions);
+function drawTxList(transactions) {
+  const txListEl = document.getElementById('tx-list');
+  calculatePaymentTx(transactions);
+  txListEl.innerHTML = `<li>Transaction Hash: ${transactions[0].hash}
+    <br>Your Reward: ${transactions[0].fee} BTC</li>`;
+  transactions.slice(1).forEach(tx => {
+    const txLi = document.createElement('li');
+    txLi.innerHTML = `Transaction Hash: ${tx.hash}
+    <br>Transaction Fee: ${tx.fee} BTC`;
+    txListEl.appendChild(txLi);
+  });
 }
 
 function calculatePaymentTx(transactions) {
@@ -155,7 +178,7 @@ function calculatePaymentTx(transactions) {
   const sequence = 'ffffffff';
 
   const countOut = '01';
-  const reward = BLOCK_REWARD * 1e8 + calculateTxFees(transactions); // convert to Satoshi's
+  const reward = BLOCK_REWARD * 1e8 + calculateTxFees(transactions); // in Satoshi's
   const value = littleEndian(reward.toString(16).padStart(16, '0')); // 8 bytes
   const spkPrefix = (65).toString(16);
   let scriptPubKey = '04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f';
@@ -168,18 +191,127 @@ function calculatePaymentTx(transactions) {
     scriptSig + sequence + countOut + value + scriptPubKeyLength + 
     scriptPubKey + nLockTime;
 
-  return hash(tx);
+  const paymentHash = hash(littleEndian(tx));
+  if (transactions[0])
+    transactions[0] = { hash: paymentHash, fee: reward / 1e8 };
+  else 
+    transactions.push({ hash: paymentHash, fee: reward / 1e8 });
 }
 
 function calculateTxFees(transactions) {
-  return transactions.reduce((sum, el) => {
-    if (el) return sum + el.dataset.fee;
+  return transactions.slice(1).reduce((sum, el) => {
+    if (el) return sum + el.fee;
     else return sum;
   }, 0);
 }
 
+const drawMerkleTree = (btcs, transactions) => {
+  btcs.send(JSON.stringify({op: 'unconfirmed_unsub'})); // close web socket
+
+  // get and reset each row's ul element
+  const row1 = document.getElementById('merkle-row-1');
+  row1.innerHTML = '';
+  const row2 = document.getElementById('merkle-row-2');
+  row2.innerHTML = '';
+  const row3 = document.getElementById('merkle-row-3');
+  row3.innerHTML = '';
+  const row4 = document.getElementById('merkle-row-4');
+  row4.innerHTML = '';
+
+  const row2Hashes = [], row3Hashes = [], row4Hash = [];
+  let merkleRootEl;
+  
+
+  // draw row 1
+  
+  // if odd number of hashes, last hash is repeated (unless only transaction)
+  if (transactions.length % 2 > 0 && transactions.length > 1)
+    transactions.push(transactions[transactions.length - 1]);
+
+  var width = (800 / transactions.length) + 'px'; // width of each li element
+
+  for (let i = 0; i < transactions.length; i++) {
+    const txLi = document.createElement('li');
+    txLi.textContent = transactions[i].hash;
+    row1.appendChild(txLi);
+    txLi.style.width = width;
+
+    // calculate row 2 hashes
+    if (transactions.length === 1) {
+      merkleRootEl = txLi;
+      merkleRoot = transactions[0].hash;
+    } else if (i % 2 === 0)
+      row2Hashes.push(hash(transactions[i].hash + transactions[i + 1].hash));
+  }
+ 
+  // draw row 2
+    if (row2Hashes.length > 0) {
+      if (row2Hashes.length % 2 > 0 && row2Hashes.length > 1)
+        row2Hashes.push(row2Hashes[row2Hashes.length - 1]);
+
+      for (let i = 0; i < row2Hashes.length; i++) {
+        const txLi = document.createElement('li');
+        txLi.textContent = row2Hashes[i];
+        row2.appendChild(txLi);
+        txLi.style.width = width;
+
+        // calculate row 3 hashes
+        if (row2Hashes.length === 1) {
+          merkleRootEl = txLi;
+          merkleRoot = row2Hashes[0];
+        } else if (i % 2 === 0) 
+          row3Hashes.push(hash(row2Hashes[i] + row2Hashes[i + 1]));
+      }
+    }
+
+  // draw row 3
+  if (row3Hashes.length > 0) {
+    if (row3Hashes.length % 2 > 0 && row3Hashes.length > 1)
+      row3Hashes.push(row3Hashes[row3Hashes.length - 1]);
+
+    for (let i = 0; i < row3Hashes.length; i++) {
+      const txLi = document.createElement('li');
+      txLi.textContent = row3Hashes[i];
+      row3.appendChild(txLi);
+      txLi.style.width = width;
+
+      // calculate row 4 hash
+      if (row3Hashes.length === 1) {
+        merkleRootEl = txLi;
+        merkleRoot = row3Hashes[0];
+      } else if (i % 2 === 0)
+        row4Hash.push(hash(row3Hashes[i] + row3Hashes[i + 1]));
+    }
+  }
+
+  // draw row 4
+  if (row4Hash.length > 0) {
+    const txLi = document.createElement('li');
+    txLi.textContent = row4Hash[0];
+    row4.appendChild(txLi);
+    txLi.style.width = width;
+    merkleRootEl = txLi;
+    merkleRoot = row4Hash[0];
+  }
+
+  console.log(merkleRootEl, merkleRoot);
+
+  // remove transactions modal and reveal merkle modal
+  const txModelEl = document.getElementById('transactions-modal');
+  const merkleModalEl = document.getElementById('merkle-modal');
+  txModelEl.classList.add('hidden');
+  merkleModalEl.classList.remove('hidden');
+
+  const startMiningButton = document.getElementById('start-mining');
+  startMiningButton.addEventListener('click', () => startMining(merkleModalEl));
+};
+
+const startMining = (merkleModelEl) => {
+  merkleModelEl.classList.add('hidden');
+};
+
 function hash(hexString) {
-  return littleEndian(sha256(hex2arr(sha256(hex2arr(hexString)))));
+  return littleEndian(sha256(hex2arr(sha256(hex2arr(littleEndian(hexString))))));
 }
 
 const hex2arr = hstr => {
