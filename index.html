@@ -6,32 +6,32 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Bitcoin Mining</title>
   <script src='./bundle.js'></script>
+  <link rel="stylesheet" href="css/reset.css">
 </head>
 <body>
- 
-<div id="messages"></div>
+<button id='start-mining'>Start Mining</button>
+<button id='pause-mining'>Pause Mining</button>
+<p id='bestHash'></p>
+<p id='target'></p>
 
-<!-- <script>
-    let btcs = new WebSocket('wss://ws.blockchain.info/inv');
-    const root = document.getElementById('messages');
-    let i = 0;
+<p id='version'></p>
+<p id='prevHash'></p>
+<p id='merkleRoot'></p>
+<p id='timeStamp'></p>
+<p id='bits'></p>
+
+<p id='nonce'></p>
+<p id='currentHash'></p>
   
-    btcs.onopen = () => btcs.send(JSON.stringify({op: 'unconfirmed_sub'}));
+<p id='bestNonce'></p>
 
-    btcs.onmessage = onmsg => {
-      i++;
-      if (i > 9) btcs.send(JSON.stringify({op: 'unconfirmed_unsub'}));
-      const response = JSON.parse(onmsg.data);
-      console.log(response.x);
-      const newMessage = document.createElement('p');
-      newMessage.innerText = JSON.stringify(response.x);
-      root.appendChild(newMessage);
-    };
+<div id='merkle-tree'></div>
+<br>
 
-    const tx = 0xf;
-    console.log(tx)
-  
-</script> -->
+<button id='start-stream'>Start Transaction Stream</button>
+<button id='stop-stream'>Stop Transaction Stream</button>
+<ul id="tx-stream"></ul>
+
   
 </body>
 </html>
