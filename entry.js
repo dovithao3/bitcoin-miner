@@ -11,6 +11,7 @@ const BTC_TO_USD = 16000; // exchange rate
 
 // merkle root of merkle tree
 let merkleRoot = '0000000000000000000000000000000000000000000000000000000000000000';
+let curBitsHex;
 
 document.addEventListener('DOMContentLoaded', () => {
   const transactions = []; // elements are objects
@@ -69,6 +70,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // start one iteration
   render();
   hashHeader(false); 
+  document.getElementById('tut-4').classList.remove('hidden');
+  document.getElementById('tut-5').classList.remove('hidden');
+  document.querySelector('.slider').addEventListener('change', () => {
+    const tut4 = document.getElementById('tut-4');
+    if (!tut4.classList.contains('hidden')) {
+      tut4.classList.add('hidden');
+      document.getElementById('tut-5').classList.add('hidden');
+      document.getElementById('tut-6').classList.remove('hidden');
+      document.getElementById('tut-7').classList.remove('hidden');
+    }
+  });
+  restartMiningButton.addEventListener('click', () => {
+    document.getElementById('tut-6').classList.add('hidden');
+    document.getElementById('tut-7').classList.add('hidden');
+  });
 
   function mine() {
     if (miningOn) {
@@ -83,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pevHashEl.textContent = prevHash;
     merkleRootEl.textContent = merkleRoot;
     timeStampEl.textContent = `${timeStamp} (${datetime})`;
-    bitsHexEl.textContent = `${bitsHex} (${sliderVal}%)`;
+    bitsHexEl.textContent = `${curBitsHex} (${sliderVal}%)`;
     nonceHexEl.textContent = nonce;
     targetEl.textContent = target;
   }
@@ -102,8 +118,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (headerHash > target && loop) {
       requestAnimationFrame(mine);
-    } else {
-      console.log('Block mined!');
+    } else if (headerHash < target) {
+      pauseMining();
+      document.querySelector('.reward').classList.add('reward-border');
+      document.querySelector('h4').classList.remove('hidden');
     }
   }
 
@@ -126,6 +144,26 @@ function tutorials() {
     `The final result of double hashing every pair of transaction hashes is 
     called the "Merkle Root" of the block and is used in the next step`);
     document.querySelector('.merkle-tree-container').appendChild(tut3);
+  const tut4 = Tutorial.createBubble(4, 'left', '133px', '-220px', '310px', '260px',
+    `In order to succesfully mine this block and claim your reward, you must find
+    a block hash that is less than the "Target", which is determined by the block's
+    difficulty (or "bits"). The blockchain self-adjusts difficulty every 2016 blocks
+    so that a new block is mined every 10 minutes on average.`);
+    document.querySelector('.mining-container').appendChild(tut4);
+  const tut5 = Tutorial.createBubble(5, 'right', '280px', '687px', '215px', '220px',
+    `Adjust this difficulty slider to make things easier for yourself than real
+    miners! Notice the "Target" increasing as you decrease difficulty. 
+    (Recommended: ~9%)`);
+    document.querySelector('.mining-container').appendChild(tut5);
+  const tut6 = Tutorial.createBubble(6, 'left', '340px', '-220px', '213px', '260px',
+    `Your "Current Hash" is calculated as follows: SHA-256 (SHA-256 ( 
+    Version + Previous Block Hash + Merkle Root + Timestamp + Bits + Nonce)) 
+    Therefore, you simply try different nonces until Current Hash < Target`);
+    document.querySelector('.mining-container').appendChild(tut6);
+  const tut7 = Tutorial.createBubble(7, 'left', '61px', '-155px', '142px', '220px',
+    `Press "Go!" when you are ready to start mining! The "Current Block Hash"
+    is the smallest Hash you have computed so far`);
+    document.querySelector('.mining-container').appendChild(tut7);
 }
 
 function populateTransactionsText() {
@@ -443,6 +481,7 @@ const calculateTarget = (bitsHex, sliderVal) => {
   }
   numZeros = Math.round(numZeros * (sliderVal / 100));
   const mantissa = Math.round((parseInt(bitsHex, 16) * (sliderVal / 100))).toString(16);
+  curBitsHex = mantissa.toString(16).padStart(6, '0');
 
   const targetHex = mantissa.padStart(mantissa.length + numZeros, '0').padEnd(64, '0');
   return targetHex;

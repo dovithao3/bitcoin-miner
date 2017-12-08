@@ -32,6 +32,8 @@ export const drawTreeLines = () => {
   .add({ targets: '.path-2', strokeDashoffset, easing, duration })
   .add({ targets: '.path-3', strokeDashoffset, easing, duration });
 
-  setTimeout(() => document.getElementById('tut-3').classList.remove('hidden')
-    , duration * 3);
+  setTimeout(() => {
+      document.getElementById('tut-3').classList.remove('hidden');
+      document.getElementById('start-mining').classList.remove('vis-hidden');
+    }, duration * 3);
 };

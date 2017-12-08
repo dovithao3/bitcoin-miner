@@ -37,6 +37,15 @@ h3 {
   line-height: 29px;
 }
 
+h4 {
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 30px;
+  color: orange;
+  margin-top: 10px
+}
+
 a {
   color: #2f98d9;
 }
@@ -55,6 +64,10 @@ button:hover {
 
 .hidden {
   display: none !important;
+}
+
+.vis-hidden {
+  visibility: hidden !important;
 }
 
 .modal {
@@ -247,6 +260,13 @@ path {
   justify-content: space-around;
   align-items: center;
   margin-top: 10px;
+  border-radius: 20px;
+  border: 5px solid white;
+  padding: 0 20px;
+}
+
+.mining-container .reward-border {
+  border: 5px solid orange;
 }
 
 .mining-container button, #start-mining {
