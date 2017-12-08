@@ -2,14 +2,15 @@ import sha256 from 'js-sha256';
 import anime from 'animejs';
 import * as Anime from './anime';
 import * as Tutorial from './tutorial';
+import { setTimeout } from 'timers';
 
 const MAX_STREAM_TX = 7; // number of transactions in stream panel
 const MAX_TX = 8; // maximum number of transaction to include in block
 const BLOCK_REWARD = 12.5; // current reward for mining block (in BTC)
-const BTC_TO_USD = 14000; // exchange rate
+const BTC_TO_USD = 16000; // exchange rate
 
 // merkle root of merkle tree
-let merkleRoot = '0000000000000000000000000000000000000000000000000000000000000000'; 
+let merkleRoot = '0000000000000000000000000000000000000000000000000000000000000000';
 
 document.addEventListener('DOMContentLoaded', () => {
   const transactions = []; // elements are objects
@@ -24,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     transactionStream(transactions, drawMerkleButton));
   
   tutorials();
-  populateTutorialText();
+  populateTransactionsText(transactions);
   
   // mining page
   const versionEl = document.getElementById('version');
@@ -39,16 +40,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const bestNonceEl = document.getElementById('bestNonce');
 
   const version = '00000001';
-  $.ajax({url: 'https://blockchain.info/latestblock'})
-    .then(console.log);
+  // $.ajax({url: 'https://blockchain.info/latestblock'})
+  //   .then(console.log);
   const prevHash = '0000000000000000000000000000000000000000000000000000000000000000';
   // const merkleRoot = '4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b';
   // const timeStamp = Math.floor(Date.parse('2009-01-03 18:15:05 GMT')/1000).toString(16);
   const datetime = (new Date(Date.now())).toUTCString();
   const timeStamp = Date.now().toString(16);
-  const bits = 486604799; // decimal representation
+  // const bits0 = 486604799; // decimal representation of block 0 bits
+  const bits = 402698477; // block #498263 bits (2017-12-08 18:02:28)
   const bitsHex = bits.toString(16);
-  const target = calculateTarget(bits);
+  let sliderVal = 100;
+  let target = calculateTarget(bitsHex, sliderVal);
+  document.querySelector('.slider').addEventListener('change', e => {
+    sliderVal = e.currentTarget.value;
+    target = calculateTarget(bitsHex, sliderVal);
+    requestAnimationFrame(render);
+  });
 
   let nonce = 0, bestNonce, bestHash, miningOn = true; // actual nonce = 2083236893
   
@@ -75,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pevHashEl.textContent = prevHash;
     merkleRootEl.textContent = merkleRoot;
     timeStampEl.textContent = `${timeStamp} (${datetime})`;
-    bitsHexEl.textContent = bitsHex;
+    bitsHexEl.textContent = `${bitsHex} (${sliderVal}%)`;
     nonceHexEl.textContent = nonce;
     targetEl.textContent = target;
   }
@@ -114,12 +122,13 @@ function tutorials() {
     `These 8 transaction hashes will be used to construct a Merkle Tree in the 
     next step`);
     document.querySelector('.tx-list-container').appendChild(tut2);
-  // const tut3 = Tutorial.createBubble(3, 'right', '35px', '200px', '110px', '150px',
-  //   'Your reward for successfully mining this block is 12.5 BTC plus transaction fees');
-  //   document.querySelector('.tx-list-container').appendChild(tut2);
+  const tut3 = Tutorial.createBubble(3, 'right', '38px', '540px', '140px', '250px',
+    `The final result of double hashing every pair of transaction hashes is 
+    called the "Merkle Root" of the block and is used in the next step`);
+    document.querySelector('.merkle-tree-container').appendChild(tut3);
 }
 
-function populateTutorialText() {
+function populateTransactionsText() {
   document.getElementById('qm-1-detail').textContent = 
     `Unconfirmed transactions are added to the blockchain by miners. Normally, 
     miners may add as many transactions as they wish as long as the total block
@@ -143,6 +152,18 @@ function populateTutorialText() {
     resulting hashes represent digital signatures of the transaction details,
     since any change to the transaction details results in a completely
     different hash`;
+}
+
+function populateMerkleText(transactions, row2Hashes) {
+  document.getElementById('qm-5-detail').innerHTML = 
+  'Each consecutive pair of transaction hashes is concatenated and then double'
+  + ' hashed as follows: SHA-256( SHA-256( ' + transactions[0].hash + 
+  ' +<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;' +
+  transactions[1].hash + ' ))<br>  which results in &ensp;' + row2Hashes[0];
+
+  document.getElementById('qm-6-detail').textContent = 
+  `If there is ever an odd number of hashes in a row, the last hash is concatenated
+  with itself and then double hashed`;
 }
 
 function transactionStream(transactions, drawMerkleButton) {
@@ -297,6 +318,7 @@ const drawMerkleTree = (btcs, transactions) => {
     txLi.textContent = transactions[i].hash;
     row1.appendChild(txLi);
     txLi.style.width = width;
+    txLi.classList.add('merkle-shadow');
 
     // calculate row 2 hashes
     if (transactions.length === 1) {
@@ -318,6 +340,7 @@ const drawMerkleTree = (btcs, transactions) => {
         txLi.textContent = row2Hashes[i];
         row2.appendChild(txLi);
         txLi.style.width = width;
+        setTimeout(() => {txLi.classList.add('merkle-shadow');}, 1000);
 
         // calculate row 3 hashes
         if (row2Hashes.length === 1) {
@@ -340,6 +363,7 @@ const drawMerkleTree = (btcs, transactions) => {
       txLi.textContent = row3Hashes[i];
       row3.appendChild(txLi);
       txLi.style.width = width;
+      setTimeout(() => {txLi.classList.add('merkle-shadow');}, 2000);
 
       // calculate row 4 hash
       if (row3Hashes.length === 1) {
@@ -358,9 +382,13 @@ const drawMerkleTree = (btcs, transactions) => {
     txLi.textContent = row4Hash[0];
     row4.appendChild(txLi);
     txLi.style.width = width;
+    setTimeout(() => {txLi.classList.add('merkle-shadow');}, 3000);
     merkleRootEl = txLi;
     merkleRoot = row4Hash[0];
   }
+
+  // tutorial text
+  populateMerkleText(transactions, row2Hashes);
 
   // remove transactions modal and reveal merkle modal
   const txModelEl = document.querySelector('.transactions-page');
@@ -406,20 +434,18 @@ const littleEndian2 = hexStr => {
   return arr.join('');
 };
 
-const calculateTarget = bits => {
-  const bitsHex = bits.toString(16);
-  return bitsHex.slice(2).padEnd(parseInt(bitsHex.substr(0,2), 16) * 2, '0').padStart(64, '0');
-};
-
-const calculateZeros = bits => {
-  let bitsHex = bits.toString(16);
+const calculateTarget = (bitsHex, sliderVal) => {
   let numZeros = 64 - parseInt(bitsHex.substr(0,2), 16) * 2;
   bitsHex = bitsHex.slice(2);
   while (bitsHex[0] === '0') {
     numZeros++;
     bitsHex = bitsHex.slice(1);
   }
-  return numZeros;
+  numZeros = Math.round(numZeros * (sliderVal / 100));
+  const mantissa = Math.round((parseInt(bitsHex, 16) * (sliderVal / 100))).toString(16);
+
+  const targetHex = mantissa.padStart(mantissa.length + numZeros, '0').padEnd(64, '0');
+  return targetHex;
 };
 
 const concatHeader = (version, prevHash, merkleRoot, timeStamp, bitsHex, nonce) => {

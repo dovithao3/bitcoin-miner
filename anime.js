@@ -31,4 +31,7 @@ export const drawTreeLines = () => {
   .add({ targets: '.path-1', strokeDashoffset, easing, duration })
   .add({ targets: '.path-2', strokeDashoffset, easing, duration })
   .add({ targets: '.path-3', strokeDashoffset, easing, duration });
+
+  setTimeout(() => document.getElementById('tut-3').classList.remove('hidden')
+    , duration * 3);
 };

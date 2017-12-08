@@ -30,7 +30,7 @@
           <h3>Previous Block Hash</h3>
           <h3>Merkle Root</h3>
           <h3>Timestamp</h3>
-          <!-- <h3>Difficulty Slider</h3> -->
+          <h3>Difficulty Slider</h3>
           <h3>Bits (Difficulty)</h3>
           <h3>Nonce</h3>
           <h3>Current Hash</h3>
@@ -44,6 +44,9 @@
           <p id='prevHash'></p>
           <p id='merkleRoot'></p>
           <p id='timeStamp'></p>
+          <div id="slidecontainer">
+            <input type="range" min="1" max="100" value="100" class="slider">
+          </div>
           <p id='bits'></p>
           <p id='nonce'></p>
           <p id='currentHash'>0</p>
@@ -51,13 +54,13 @@
         </div>
       </div>
 
-      <header>
+      <div class='reward'>
         <h1>Reward</h1>
         <img class='logo-btc' src="https://i.pinimg.com/564x/ef/da/8b/efda8b6316786f2ff349f3065974249b--bitcoin-logo-logo-google.jpg" alt="Bitcoin Logo">
         <h1 id='reward-btc'></h1>
         <img class='logo-usd' src="https://www.logoarena.com/img/co-dollar.svg" alt="Dollar Logo">
         <h1 id='reward-usd'></h1>
-      </header>
+      </div>
     </div>
   </div>
 
@@ -68,11 +71,11 @@
         <ul id='tx-list'></ul>
         <button id='calc-merkle' class='hidden'>Calculate Merkle Root</button>
         <div class='qm-div' id='qm-3-div'>
-          <img class='qm' src="http://www.freeiconspng.com/uploads/orange-question-mark-icon-png-clip-art-30.png" alt="Question Mark Icon">
+          <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
           <div class='qm-detail' id='qm-3-detail'></div>
         </div>
         <div class='qm-div' id='qm-4-div'>
-          <img class='qm' src="http://www.freeiconspng.com/uploads/orange-question-mark-icon-png-clip-art-30.png" alt="Question Mark Icon">
+          <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
           <div class='qm-detail' id='qm-4-detail'></div>
         </div>
       </section>
@@ -81,13 +84,13 @@
           <button id='start-stream'>Start Live Transactions</button>
           <button id='stop-stream'>Pause Live Transactions</button>
           <div class='qm-div' id='qm-2-div'>
-            <img class='qm' src="http://www.freeiconspng.com/uploads/orange-question-mark-icon-png-clip-art-30.png" alt="Question Mark Icon">
+            <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
             <div class='qm-detail' id='qm-2-detail'></div>
           </div>
         </div>
         <ul id="tx-stream">
           <div class='qm-div hidden' id='qm-1-div'>
-            <img class='qm' src="http://www.freeiconspng.com/uploads/orange-question-mark-icon-png-clip-art-30.png" alt="Question Mark Icon">
+            <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
             <div class='qm-detail' id='qm-1-detail'></div>
           </div>
         </ul>
@@ -102,6 +105,14 @@
         <ul id='merkle-row-3' class='merkle-row'></ul>
         <ul id='merkle-row-2' class='merkle-row'></ul>
         <ul id='merkle-row-1' class='merkle-row'></ul>
+        <div class='qm-div' id='qm-5-div'>
+          <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
+          <div class='qm-detail' id='qm-5-detail'></div>
+        </div>
+        <div class='qm-div' id='qm-6-div'>
+          <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
+          <div class='qm-detail' id='qm-6-detail'></div>
+        </div>
       </div>
     </div>
   
