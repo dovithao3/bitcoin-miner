@@ -6,44 +6,96 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Bitcoin Mining</title>
   <script src='./bundle.js'></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Fugaz+One|Inconsolata:400,700" rel="stylesheet">
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/layout.css">
 </head>
 <body>
-  <div class='main-content'>
-    <div class='mining-container'>
+  <div class='main-content hidden'>
+    <div class='mining-container hidden'>
+
+      <h2>Bitcoin Miner</h2>
+
+      <div>
       <button id='restart-mining'>Go!</button>
       <button id='pause-mining'>Pause/Restart</button>
-      <p id='bestHash'></p>
-      <p id='target'></p>
-
-      <p id='version'></p>
-      <p id='prevHash'></p>
-      <p id='merkleRoot'></p>
-      <p id='timeStamp'></p>
-      <p id='bits'></p>
-
-      <p id='nonce'></p>
-      <p id='currentHash'></p>
-        
-      <p id='bestNonce'></p>
-    </div>
-
-    <div id='transactions-modal' class='modal'>
-      <div class='transactions-page'>
-        <section class='tx-list-container'>
-          <button id='calc-merkle'>Calculate Merkle Root</button>
-          <ul id='tx-list'></ul>
-        </section>
-        <section class='transactions-container'>
-          <button id='start-stream'>Start Live Transactions</button>
-          <button id='stop-stream'>Stop Live Transactions</button>
-          <ul id="tx-stream"></ul>
-        </section>
       </div>
-    </div>
+      
+      <div class='mining-data'>
+        <div class='mining-labels'>
+          <h3>Current Block Hash</h3>
+          <h3>Target</h3>
+          <h3>Version</h3>
+          <h3>Previous Block Hash</h3>
+          <h3>Merkle Root</h3>
+          <h3>Timestamp</h3>
+          <!-- <h3>Difficulty Slider</h3> -->
+          <h3>Bits (Difficulty)</h3>
+          <h3>Nonce</h3>
+          <h3>Current Hash</h3>
+          <h3>Best Nonce</h3>
+        </div>
+        
+        <div class='mining-values'>
+          <p id='bestHash'>0</p>
+          <p id='target'></p>
+          <p id='version'></p>
+          <p id='prevHash'></p>
+          <p id='merkleRoot'></p>
+          <p id='timeStamp'></p>
+          <p id='bits'></p>
+          <p id='nonce'></p>
+          <p id='currentHash'>0</p>
+          <p id='bestNonce'>0</p>
+        </div>
+      </div>
 
-    <div id='merkle-modal' class='modal hidden'>
+      <header>
+        <h1>Reward</h1>
+        <img class='logo-btc' src="https://i.pinimg.com/564x/ef/da/8b/efda8b6316786f2ff349f3065974249b--bitcoin-logo-logo-google.jpg" alt="Bitcoin Logo">
+        <h1 id='reward-btc'></h1>
+        <img class='logo-usd' src="https://www.logoarena.com/img/co-dollar.svg" alt="Dollar Logo">
+        <h1 id='reward-usd'></h1>
+      </header>
+    </div>
+  </div>
+
+  <div class='transactions-main'>
+    <h2 style='color: white'>Bitcoin Miner</h2>
+    <div class='transactions-page'>
+      <section class='tx-list-container'>
+        <ul id='tx-list'></ul>
+        <button id='calc-merkle' class='hidden'>Calculate Merkle Root</button>
+        <div class='qm-div' id='qm-3-div'>
+          <img class='qm' src="http://www.freeiconspng.com/uploads/orange-question-mark-icon-png-clip-art-30.png" alt="Question Mark Icon">
+          <div class='qm-detail' id='qm-3-detail'></div>
+        </div>
+        <div class='qm-div' id='qm-4-div'>
+          <img class='qm' src="http://www.freeiconspng.com/uploads/orange-question-mark-icon-png-clip-art-30.png" alt="Question Mark Icon">
+          <div class='qm-detail' id='qm-4-detail'></div>
+        </div>
+      </section>
+      <section class='transactions-container'>
+        <div class='tx-buttons'>
+          <button id='start-stream'>Start Live Transactions</button>
+          <button id='stop-stream'>Pause Live Transactions</button>
+          <div class='qm-div' id='qm-2-div'>
+            <img class='qm' src="http://www.freeiconspng.com/uploads/orange-question-mark-icon-png-clip-art-30.png" alt="Question Mark Icon">
+            <div class='qm-detail' id='qm-2-detail'></div>
+          </div>
+        </div>
+        <ul id="tx-stream">
+          <div class='qm-div hidden' id='qm-1-div'>
+            <img class='qm' src="http://www.freeiconspng.com/uploads/orange-question-mark-icon-png-clip-art-30.png" alt="Question Mark Icon">
+            <div class='qm-detail' id='qm-1-detail'></div>
+          </div>
+        </ul>
+      </section>
+    </div>
+  </div>
+
+    <div id='merkle-modal' class='hidden'>
       <button id='start-mining'>Start Mining</button>
       <div class='merkle-tree-container'>
         <ul id='merkle-row-4' class='merkle-row'></ul>
@@ -52,6 +104,6 @@
         <ul id='merkle-row-1' class='merkle-row'></ul>
       </div>
     </div>
-  </div>
+  
 </body>
 </html>

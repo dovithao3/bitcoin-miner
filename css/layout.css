@@ -5,8 +5,36 @@ html {
 }
 
 body {
-  font-family: 'Open Sans';
+  font-family: 'Inconsolata', monospace;
   font-size: 14px;
+  background: url(http://www.dirad.com/wp-content/uploads/2015/08/Network-background-2.jpg) no-repeat center center fixed;
+  background-size: cover;
+}
+
+.main-content {
+  position: relative;
+  width: 800px;
+  height: 800px;
+  margin: 20px auto;
+  background-color: white;
+  border-radius: 400px;
+}
+
+h2 {
+  font-size: 60px;
+  font-family: 'Fugaz One', cursive;
+  text-transform: uppercase;
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+h3 {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 29px;
 }
 
 a {
@@ -14,19 +42,14 @@ a {
 }
 
 button {
-  border: 1px solid white;
   border-radius: 5px;
   background-color: orange;
+  box-shadow: 1px 1px 10px gray;
   padding: 5px;
 }
 
 .hidden {
   display: none !important;
-}
-
-.main-content {
-  width: 1000px;
-  margin: 20px auto;
 }
 
 .modal {
@@ -40,40 +63,93 @@ button {
   z-index: 100;
 }
 
+.transactions-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .transactions-page {
-  width: 940px;
-  margin: 0 auto;
+  width: 820px;
   display: flex;
   justify-content: space-between;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 20px;
 }
 
 .tx-list-container {
-  width: 600px;
-  height: 800px;
-  border: 1px solid gray;
-  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 500px;
+  height: 700px;
+  border: 1px solid black;
+  border-radius: 10px;
 }
 
 .transactions-container {
+  position: relative;
   width: 300px;
-  height: 800px;
-  border: 1px solid gray;
-  border-radius: 5px;
+  height: 700px;
+  border: 1px solid black;
+  border-radius: 10px;
+}
+
+.tx-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 5px;
+}
+
+.tx-buttons button {
+  width: 30%;
+  text-align: center;
+}
+
+#tx-list {
+  /* position: absolute; */
 }
 
 #tx-list > li {
-  border: 1px solid gray;
-  border-radius: 5px;
+  border: 1px solid black;
+  border-radius: 10px;
   padding: 10px;
   margin: 10px;
+  background-color: white;
+}
+
+#tx-stream {
+  position: relative;
 }
 
 #tx-stream > li {
-  border-top: 1px solid gray;
-  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid black;
+  padding: 7px 10px;
+}
+
+#tx-stream > li:first-of-type {
+  border-top: 0;
+}
+
+#tx-stream > li > p {
+  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+#tx-stream > li > button {
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+#calc-merkle {
+  margin-top: 10px
 }
 
 #merkle-modal {
@@ -83,32 +159,45 @@ button {
 }
 
 .merkle-tree-container {
+  position: relative;
   width: 900px;
   height: 700px;
   margin: 0 auto;
-  border: 1px solid gray;
-  border-radius: 5px;
-
+  /* border: 1px solid black;
+  border-radius: 5px; */
 }
 
 .merkle-row {
   display: flex;
   justify-content: space-around;
   align-items: center;
+  position: absolute;
   width: 100%;
   height: 25%;
-  border: 1px solid gray;
-  border-radius: 5px;
+  /* border: 1px solid black;
+  border-radius: 5px; */
   box-sizing: border-box;
   padding: 10px;
+}
+
+#merkle-row-1 {
+  top: calc(700px * 3/4);
+}
+
+#merkle-row-2 {
+  top: calc(700px * 1/2);
+}
+
+#merkle-row-3 {
+  top: calc(700px * 1/4);
 }
 
 .merkle-row > li {
   height: 50%;
   line-height: 50px;
-  border: 1px solid gray;
   border-radius: 5px;
   box-sizing: border-box;
+  background-color: orange;
   padding: 10px;
   margin-right: 10px;
   text-align: center;
@@ -121,8 +210,154 @@ button {
   margin-right: 0;
 }
 
+.merkle-shadow {
+  box-shadow: 0px 0px 20px white;
+}
+
+svg {
+  position: absolute;
+  width: 600px;
+  height: 200px;
+  /* background-color: black; */
+}
+
+path {
+  stroke: white;
+  stroke-width: 2px;
+  fill: none; 
+}
+
 .mining-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: absolute;
+  top: 100px;
+  left: 65px;
+}
+
+.mining-container > header {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+img.logo-btc {
+  width: 70px;
+}
+
+img.logo-usd {
+  width: 50px;
+}
+
+.mining-data {
+ display: flex;
+}
+
+.mining-labels {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-right: 10px;
+}
+
+.mining-values {
+  display: flex;
+  flex-direction: column;
+}
+
+.mining-values > p {
+  background-color: orange;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.bubble {
+  /* width: 140px;
+  height: 100px; */
+  background: orange;
+  position: absolute;
+  border-radius: 12px;
+  box-shadow: 3px 3px 20px gray;
+  z-index: 3;
+  padding: 10px;
+  font-size: 20px;
+  line-height: 24px;
+}
+
+.bubble-right:before {
+  content: "";
+  width: 0;
+  height: 0;
+  right: 100%;
+  top: 38px;
+  position: absolute;
+  border-top: 12px solid transparent;
+  border-right: 24px solid orange;
+  border-bottom: 12px solid transparent;
+  z-index: 3;
+}
+
+.bubble-left:before {
+  content: "";
+  width: 0;
+  height: 0;
+  left: 100%;
+  top: 38px;
+  position: absolute;
+  border-top: 12px solid transparent;
+  border-left: 24px solid orange;
+  border-bottom: 12px solid transparent;
+  z-index: 3;
+}
+
+.badge {
+  display: inline-block;
+  background-color: white;
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  text-align: center;
+  line-height: 24px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.qm-div {
+  position: absolute;
+}
+
+.qm {
+  width: 25px;
+  height: auto;
+}
+
+.qm-detail {
+  display: none;
+  position: absolute;
+  width: 250px;
+  padding: 10px;
+  box-shadow: 3px 3px 20px gray;
+  border-radius: 10px;
+  background-color: orange;
+  z-index: 4;
+}
+
+.qm-div:hover .qm-detail {
+  display: block;
+}
+
+#qm-1-div {
+  top: 38px;
+  left: 228px;
+}
+
+#qm-3-div {
+  top: 50px;
+  left: 220px;
+}
+
+#qm-4-div {
+  top: 12px;
+  left: 140px;
 }
