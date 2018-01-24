@@ -342,7 +342,7 @@ const drawMerkleTree = (btcs, transactions) => {
   row4.innerHTML = '';
 
   const row2Hashes = [], row3Hashes = [], row4Hash = [];
-  let merkleRootEl;
+  let merkleRootEl, hash11Li, hash12Li, hash21Li; // '11' means row 1, left-most hash
   
 
   // draw row 1
@@ -359,6 +359,10 @@ const drawMerkleTree = (btcs, transactions) => {
     row1.appendChild(txLi);
     txLi.style.width = width;
     txLi.classList.add('merkle-shadow');
+
+    // keep record of first 2 hashes for animation
+    if (i == 0) hash11Li = txLi;
+    if (i == 1) hash12Li = txLi;
 
     // calculate row 2 hashes
     if (transactions.length === 1) {
@@ -381,6 +385,9 @@ const drawMerkleTree = (btcs, transactions) => {
         row2.appendChild(txLi);
         txLi.style.width = width;
         setTimeout(() => {txLi.classList.add('merkle-shadow');}, 1000);
+
+        // keep record of first 2 hashes for animation
+        if (i == 0) hash21Li = txLi;
 
         // calculate row 3 hashes
         if (row2Hashes.length === 1) {
@@ -439,6 +446,105 @@ const drawMerkleTree = (btcs, transactions) => {
   const startMiningButton = document.getElementById('start-mining');
   startMiningButton.addEventListener('click', () => hideMerkleModal(merkleModalEl));
 
+  // Animate hashing of transaction IDs
+  const hash11El = document.createElement('span'), 
+    hash12El = document.createElement('span'),
+    hash21El = document.createElement('span'),
+    plusSign = document.createElement('span'),
+    sha256Text = document.createElement('pre');
+  hash11El.id = 'hash-11';
+  hash12El.id = 'hash-12';
+  hash21El.id = 'hash-21';
+  plusSign.id = 'plus';
+  sha256Text.id = 'sha256-text';
+  hash11El.textContent = hash11Li.textContent;
+  hash12El.textContent = hash12Li.textContent;
+  hash21El.textContent = hash21Li.textContent;
+  plusSign.textContent = '+';
+  sha256Text.textContent = 'SHA-256( SHA-256(                                 ) )';
+  row1.appendChild(hash11El);
+  row1.appendChild(hash12El);
+  row3.appendChild(hash21El);
+  row3.appendChild(plusSign);
+  row3.appendChild(sha256Text);
+
+  anime.timeline()
+    .add({
+      targets: hash11El,
+      translateX: 274,
+      translateY: -287,
+      fontSize: '20px',
+      color: '#FFF',
+      opacity: 1,
+      duration: 3000,
+      easing: 'easeInOutQuad',
+    })
+    .add({
+      targets: plusSign,
+      opacity: 1,
+      duration: 1000
+    })
+    .add({
+      targets: sha256Text,
+      opacity: 1,
+      duration: 1000
+    })
+    .add({
+      targets: [hash11El, plusSign, sha256Text],
+      opacity: 0,
+      color: '#000',
+      duration: 1000
+    })
+    .add({
+      targets: hash21El,
+      opacity: { value: 1, duration: 1000 },
+      translateX: { value: -218, duration: 2000, delay: 2000 },
+      translateY: { value: 94, duration: 2000, delay: 2000 },
+      fontSize: { value: '14px', duration: 2000, delay: 2000 },
+      color: { value: '#000', duration: 1000, delay: 2000 },
+      easing: 'easeInOutQuad',
+    })
+
+  anime.timeline()
+    .add({
+      targets: hash12El,
+      translateX: 163,
+      translateY: -250,
+      fontSize: '20px',
+      color: '#FFF',
+      opacity: 1,
+      duration: 3000,
+      easing: 'easeInOutQuad',
+    })
+    .add({
+      targets: hash12El,
+      opacity: 0,
+      color: '#000',
+      duration: 1000,
+      delay: 2000,
+    })
+
+    // anime({
+    //   targets: plusSign,
+    //   opacity: [
+    //     { value: 0, duration: 5000 },
+    //     { value: 1, duration: 1000 },
+    //     { value: 1, duration: 1000 },
+    //     { value: 0, duration: 1000 },
+    //   ],
+    // })
+
+    // anime({
+    //   targets: hash21El,
+    //   opacity: [
+    //     { value: 0, duration: 6000 },
+    //     { value: 1, duration: 2000 },
+    //     { value: 1, duration: 2000 },
+    //     { value: 0, duration: 1000 },
+    //   ],
+    // })
+
+  // Draw tree
   Anime.drawTreeLines();
 };
 

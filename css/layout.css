@@ -211,12 +211,12 @@ button:hover {
 }
 
 .merkle-row > li {
+  position: relative;
   height: 50%;
   line-height: 50px;
   border-radius: 5px;
   box-sizing: border-box;
   background-color: orange;
-  opacity: 70%;
   padding: 10px;
   margin-right: 10px;
   text-align: center;
@@ -244,6 +244,49 @@ path {
   stroke: white;
   stroke-width: 2px;
   fill: none; 
+}
+
+#hash-11 {
+  position: absolute;
+  top: 76px;
+  left: 22px;
+  opacity: 0.4;
+  z-index: 1;
+}
+
+#hash-12 {
+  position: absolute;
+  top: 76px;
+  left: 133px;
+  opacity: 0.4;
+}
+
+#hash-21 {
+  position: absolute;
+  top: 157px;
+  left: 296px;
+  opacity: 0;
+  color: white;
+  font-size: 20px;
+  z-index: 1;
+}
+
+#plus {
+  position: absolute;
+  top: 157px;
+  left: 590px;
+  opacity: 0;
+  color: white;
+  font-size: 20px;
+}
+
+#sha256-text {
+  position: absolute;
+  top: 146px;
+  left: -50px;
+  opacity: 0;
+  color: white;
+  font-size: 40px;
 }
 
 .mining-container {
