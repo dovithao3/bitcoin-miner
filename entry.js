@@ -7,7 +7,7 @@ import { setTimeout } from 'timers';
 const MAX_STREAM_TX = 7; // number of transactions in stream panel
 const MAX_TX = 8; // maximum number of transaction to include in block
 const BLOCK_REWARD = 12.5; // current reward for mining block (in BTC)
-const BTC_TO_USD = 16000; // exchange rate
+const BTC_TO_USD = 12000; // exchange rate
 
 // merkle root of merkle tree
 let merkleRoot = '0000000000000000000000000000000000000000000000000000000000000000';
@@ -133,8 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function tutorials() {
-  const tut1 = Tutorial.createBubble(1, 'left', '30px', '-190px', '90px', '145px',
-    'Add 7 unconfirmed transactions to your block');
+  const tut1 = Tutorial.createBubble(1, 'right', '30px', '310px', '90px', '145px',
+    `Add ${MAX_TX - 1} unconfirmed transactions to your block`);
     document.querySelector('.transactions-container').appendChild(tut1);
   const tut2 = Tutorial.createBubble(2, 'right', '600px', '360px', '95px', '222px',
     `These 8 transaction hashes will be used to construct a Merkle Tree in the 
@@ -256,14 +256,16 @@ function transactionStream(transactions, drawMerkleButton) {
 
 function addTxToBlock(txObj, txEl, transactions) {
   const tut1 = document.getElementById('tut-1');
-  if (tut1) tut1.remove();
 
   if (transactions.length < MAX_TX) {
     transactions.push(txObj);
+    tut1.innerHTML = `<span class="badge">1</span> ` +
+      `Add ${MAX_TX - transactions.length} unconfirmed transactions to your block`;
     txEl.remove();
     drawTxList(transactions);
 
     if (transactions.length === MAX_TX) {
+      tut1.remove()
       document.getElementById('calc-merkle').classList.remove('hidden');
       document.getElementById('tut-2').classList.remove('hidden');
     }
@@ -481,7 +483,7 @@ const calculateTarget = (bitsHex, sliderVal) => {
   }
   numZeros = Math.round(numZeros * (sliderVal / 100));
   const mantissa = Math.round((parseInt(bitsHex, 16) * (sliderVal / 100))).toString(16);
-  curBitsHex = mantissa.toString(16).padStart(6, '0');
+  curBitsHex = bitsHex.substr(0,2) + mantissa.toString(16).padStart(4, '0');
 
   const targetHex = mantissa.padStart(mantissa.length + numZeros, '0').padEnd(64, '0');
   return targetHex;
