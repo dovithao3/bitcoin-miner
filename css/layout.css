@@ -70,6 +70,10 @@ button:hover {
   visibility: hidden !important;
 }
 
+.translucent {
+  opacity: 0;
+}
+
 .modal {
   position: absolute;
   width: 100%;
@@ -282,7 +286,7 @@ path {
 
 #sha256-text {
   position: absolute;
-  top: 146px;
+  top: 155px;
   left: -50px;
   opacity: 0;
   color: white;

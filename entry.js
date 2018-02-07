@@ -341,98 +341,75 @@ const drawMerkleTree = (btcs, transactions) => {
   const row4 = document.getElementById('merkle-row-4');
   row4.innerHTML = '';
 
-  const row2Hashes = [], row3Hashes = [], row4Hash = [];
-  let merkleRootEl, hash11Li, hash12Li, hash21Li; // '11' means row 1, left-most hash
+  const row2Hashes = [], row3Hashes = [], row4Hash = [],
+    row1HashEls = [], row2HashEls = [], row3HashEls = [], row4HashEl = [];
   
-
-  // draw row 1
-  
-  // if odd number of hashes, last hash is repeated (unless only transaction)
-  if (transactions.length % 2 > 0 && transactions.length > 1)
-    transactions.push(transactions[transactions.length - 1]);
-  var widthNum = 800 / transactions.length;
-  var width = widthNum + 'px'; // width of each li element
-
-  for (let i = 0; i < transactions.length; i++) {
+  function createTxLi(hash, width, row) {
     const txLi = document.createElement('li');
-    txLi.textContent = transactions[i].hash;
-    row1.appendChild(txLi);
+    txLi.textContent = hash;
     txLi.style.width = width;
-    txLi.classList.add('merkle-shadow');
+    txLi.className = `row-${row}-el translucent`;
+    return txLi;
+  }
+  
+  const widthNum = 100;
+  const width = widthNum + 'px'; // width of each li element
 
-    // keep record of first 2 hashes for animation
-    if (i == 0) hash11Li = txLi;
-    if (i == 1) hash12Li = txLi;
+  // calculate row 1
+  for (let i = 0; i < transactions.length; i++) {
+    // store tx elements
+    row1HashEls.push(createTxLi(transactions[i].hash, width, 1));
 
     // calculate row 2 hashes
-    if (transactions.length === 1) {
-      merkleRootEl = txLi;
-      merkleRoot = transactions[0].hash;
-    } else if (i % 2 === 0) {
-      row2Hashes.push(hash(transactions[i].hash + transactions[i + 1].hash));
-      Anime.createTreeLines(widthNum, i, transactions.length, 1);
-    }
-  }
- 
-  // draw row 2
-    if (row2Hashes.length > 0) {
-      if (row2Hashes.length % 2 > 0 && row2Hashes.length > 1)
-        row2Hashes.push(row2Hashes[row2Hashes.length - 1]);
-
-      for (let i = 0; i < row2Hashes.length; i++) {
-        const txLi = document.createElement('li');
-        txLi.textContent = row2Hashes[i];
-        row2.appendChild(txLi);
-        txLi.style.width = width;
-        setTimeout(() => {txLi.classList.add('merkle-shadow');}, 1000);
-
-        // keep record of first 2 hashes for animation
-        if (i == 0) hash21Li = txLi;
-
-        // calculate row 3 hashes
-        if (row2Hashes.length === 1) {
-          merkleRootEl = txLi;
-          merkleRoot = row2Hashes[0];
-        } else if (i % 2 === 0) {
-          row3Hashes.push(hash(row2Hashes[i] + row2Hashes[i + 1]));
-          Anime.createTreeLines(widthNum, i, row2Hashes.length, 2);
-        }
-      }
-    }
-
-  // draw row 3
-  if (row3Hashes.length > 0) {
-    if (row3Hashes.length % 2 > 0 && row3Hashes.length > 1)
-      row3Hashes.push(row3Hashes[row3Hashes.length - 1]);
-
-    for (let i = 0; i < row3Hashes.length; i++) {
-      const txLi = document.createElement('li');
-      txLi.textContent = row3Hashes[i];
-      row3.appendChild(txLi);
-      txLi.style.width = width;
-      setTimeout(() => {txLi.classList.add('merkle-shadow');}, 2000);
-
-      // calculate row 4 hash
-      if (row3Hashes.length === 1) {
-        merkleRootEl = txLi;
-        merkleRoot = row3Hashes[0];
-      } else if (i % 2 === 0) {
-        row4Hash.push(hash(row3Hashes[i] + row3Hashes[i + 1]));
-        Anime.createTreeLines(widthNum, i, row3Hashes.length, 3);
-      }
+    if (i % 2 != 0) {
+      row2Hashes.push(hash(transactions[i - 1].hash + transactions[i].hash));
+      Anime.createTreeLines(widthNum, i - 1, transactions.length, 1);
     }
   }
 
-  // draw row 4
-  if (row4Hash.length > 0) {
-    const txLi = document.createElement('li');
-    txLi.textContent = row4Hash[0];
-    row4.appendChild(txLi);
-    txLi.style.width = width;
-    setTimeout(() => {txLi.classList.add('merkle-shadow');}, 3000);
-    merkleRootEl = txLi;
-    merkleRoot = row4Hash[0];
+  // calculate row 2
+  for (let i = 0; i < row2Hashes.length; i++) {
+    // store tx elements
+    row2HashEls.push(createTxLi(row2Hashes[i], width, 2));
+
+    // calculate row 3 hashes
+    if (i % 2 != 0) {
+      row3Hashes.push(hash(row2Hashes[i - 1] + row2Hashes[i]));
+      Anime.createTreeLines(widthNum, i - 1, row2Hashes.length, 2);
+    }
   }
+
+  // calculate row 3
+  for (let i = 0; i < row3Hashes.length; i++) {
+    // store tx elements
+    row3HashEls.push(createTxLi(row3Hashes[i], width, 3));
+
+    // calculate row 4 hash
+    if (i % 2 != 0) {
+      row4Hash.push(hash(row3Hashes[i - 1] + row3Hashes[i]));
+      Anime.createTreeLines(widthNum, i - 1, row3Hashes.length, 3);
+    }
+  }
+
+  // calculate row 4
+  row4HashEl.push(createTxLi(row4Hash[0], width, 4));
+
+  // draw rows (opacity = 0 initially)
+  for (let i = 0; i < row1HashEls.length; i++) {
+    const el = row1HashEls[i];
+    el.classList.remove('translucent');
+    row1.appendChild(el);
+  }
+
+  for (let i = 0; i < row2HashEls.length; i++) {
+    row2.appendChild(row2HashEls[i]);
+  }
+
+  for (let i = 0; i < row3HashEls.length; i++) {
+    row3.appendChild(row3HashEls[i]);
+  }
+
+  row4.appendChild(row4HashEl[0]);
 
   // tutorial text
   populateMerkleText(transactions, row2Hashes);
@@ -446,106 +423,34 @@ const drawMerkleTree = (btcs, transactions) => {
   const startMiningButton = document.getElementById('start-mining');
   startMiningButton.addEventListener('click', () => hideMerkleModal(merkleModalEl));
 
-  // Animate hashing of transaction IDs
-  const hash11El = document.createElement('span'), 
-    hash12El = document.createElement('span'),
-    hash21El = document.createElement('span'),
-    plusSign = document.createElement('span'),
-    sha256Text = document.createElement('pre');
-  hash11El.id = 'hash-11';
-  hash12El.id = 'hash-12';
-  hash21El.id = 'hash-21';
-  plusSign.id = 'plus';
-  sha256Text.id = 'sha256-text';
-  hash11El.textContent = hash11Li.textContent;
-  hash12El.textContent = hash12Li.textContent;
-  hash21El.textContent = hash21Li.textContent;
-  plusSign.textContent = '+';
-  sha256Text.textContent = 'SHA-256( SHA-256(                                 ) )';
-  row1.appendChild(hash11El);
-  row1.appendChild(hash12El);
-  row3.appendChild(hash21El);
-  row3.appendChild(plusSign);
-  row3.appendChild(sha256Text);
+  document.querySelectorAll('.qm').forEach(mark => {
+    mark.classList.add('translucent');
+  });
 
-  anime.timeline()
-    .add({
-      targets: hash11El,
-      translateX: 274,
-      translateY: -287,
-      fontSize: '20px',
-      color: '#FFF',
-      opacity: 1,
-      duration: 3000,
-      easing: 'easeInOutQuad',
-    })
-    .add({
-      targets: plusSign,
-      opacity: 1,
-      duration: 1000
-    })
-    .add({
-      targets: sha256Text,
-      opacity: 1,
-      duration: 1000
-    })
-    .add({
-      targets: [hash11El, plusSign, sha256Text],
-      opacity: 0,
-      color: '#000',
-      duration: 1000
-    })
-    .add({
-      targets: hash21El,
-      opacity: { value: 1, duration: 1000 },
-      translateX: { value: -218, duration: 2000, delay: 2000 },
-      translateY: { value: 94, duration: 2000, delay: 2000 },
-      fontSize: { value: '14px', duration: 2000, delay: 2000 },
-      color: { value: '#000', duration: 1000, delay: 2000 },
-      easing: 'easeInOutQuad',
-    })
-
-  anime.timeline()
-    .add({
-      targets: hash12El,
-      translateX: 163,
-      translateY: -250,
-      fontSize: '20px',
-      color: '#FFF',
-      opacity: 1,
-      duration: 3000,
-      easing: 'easeInOutQuad',
-    })
-    .add({
-      targets: hash12El,
-      opacity: 0,
-      color: '#000',
-      duration: 1000,
-      delay: 2000,
-    })
-
-    // anime({
-    //   targets: plusSign,
-    //   opacity: [
-    //     { value: 0, duration: 5000 },
-    //     { value: 1, duration: 1000 },
-    //     { value: 1, duration: 1000 },
-    //     { value: 0, duration: 1000 },
-    //   ],
-    // })
-
-    // anime({
-    //   targets: hash21El,
-    //   opacity: [
-    //     { value: 0, duration: 6000 },
-    //     { value: 1, duration: 2000 },
-    //     { value: 1, duration: 2000 },
-    //     { value: 0, duration: 1000 },
-    //   ],
-    // })
+  const promise = Anime.animateMerkleTree(
+    transactions, row2Hashes, row1, row2, row3, row4
+  );
 
   // Draw tree
-  Anime.drawTreeLines();
+  promise.finished.then(() => {
+    document.querySelectorAll('.path').forEach(path => {
+      path.classList.remove('hidden');
+    });
+    document.querySelector('#hash-11').classList.add('hidden');
+
+    row1HashEls.forEach(el => el.classList.add('merkle-shadow'));
+    setTimeout(() => {
+      row2HashEls.forEach(el => el.classList.add('merkle-shadow'));
+    }, 1000);
+    setTimeout(() => {
+      row3HashEls.forEach(el => el.classList.add('merkle-shadow'));
+    }, 2000);
+    setTimeout(() => {
+      row4HashEl.forEach(el => el.classList.add('merkle-shadow'));
+    }, 3000);
+
+    Anime.drawTreeLines();
+  });
 };
 
 const hideMerkleModal = merkleModelEl => {
