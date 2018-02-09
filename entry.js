@@ -3,18 +3,23 @@ import anime from 'animejs';
 import * as Anime from './anime';
 import * as Tutorial from './tutorial';
 import { setTimeout } from 'timers';
+import BigNumber from 'bignumber.js';
 
 const MAX_STREAM_TX = 7; // number of transactions in stream panel
 const MAX_TX = 8; // maximum number of transaction to include in block
-const BLOCK_REWARD = 12.5; // current reward for mining block (in BTC)
-const BTC_TO_USD = 12000; // exchange rate
+let BLOCK_REWARD = 12.5; // current reward for mining block (in BTC)
+let BTC_TO_USD = 8000; // exchange rate (will be changed by api call below)
 
 // merkle root of merkle tree
 let merkleRoot = '0000000000000000000000000000000000000000000000000000000000000000';
 let curBitsHex;
 
 document.addEventListener('DOMContentLoaded', () => {
-  const transactions = []; // elements are objects
+  const transactions = []; // elements are objects with properties hash and fee
+
+  // get current BTC-USD rate
+  $.ajax({url: `https://blockchain.info/ticker`})
+    .then(res => BTC_TO_USD = res.USD.last);
 
   // start drawing transactions modal
   const drawMerkleButton = document.getElementById('calc-merkle');
@@ -40,19 +45,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const bestHashEl = document.getElementById('bestHash');
   const bestNonceEl = document.getElementById('bestNonce');
 
-  const version = '00000001';
-  // $.ajax({url: 'https://blockchain.info/latestblock'})
-  //   .then(console.log);
-  const prevHash = '0000000000000000000000000000000000000000000000000000000000000000';
+  let version = '00000001';
+  let prevHash = '0000000000000000000000000000000000000000000000000000000000000000';
   // const merkleRoot = '4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b';
   // const timeStamp = Math.floor(Date.parse('2009-01-03 18:15:05 GMT')/1000).toString(16);
   const datetime = (new Date(Date.now())).toUTCString();
   const timeStamp = Date.now().toString(16);
   // const bits0 = 486604799; // decimal representation of block 0 bits
   const bits = 402698477; // block #498263 bits (2017-12-08 18:02:28)
-  const bitsHex = bits.toString(16);
+  let bitsHex = bits.toString(16);
   let sliderVal = 100;
   let target = calculateTarget(bitsHex, sliderVal);
+
+  // get latest block information
+  $.ajax({url: 'https://blockchain.info/q/latesthash'})
+    .then(hash => {
+      prevHash = hash;
+      return $.ajax({url: `https://blockexplorer.com/api/block/${hash}`});
+    })
+    .then(block => {
+      console.log(block);
+      BLOCK_REWARD = block.reward;
+      version = block.version.toString(16);
+      bitsHex = block.bits;
+      target = calculateTarget(bitsHex, sliderVal);
+    });
+  
+  // difficulty slider listener
   document.querySelector('.slider').addEventListener('change', e => {
     sliderVal = e.currentTarget.value;
     target = calculateTarget(bitsHex, sliderVal);
@@ -96,7 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function render() {
     versionEl.textContent = version;
-    pevHashEl.textContent = prevHash;
+    pevHashEl.innerHTML = `<p><a href='https://blockchain.info/block/${prevHash}'
+      target='_blank'>${prevHash}</a></p>`;
     merkleRootEl.textContent = merkleRoot;
     timeStampEl.textContent = `${timeStamp} (${datetime})`;
     bitsHexEl.textContent = `${curBitsHex} (${sliderVal}%)`;
@@ -387,6 +407,7 @@ const drawMerkleTree = (btcs, transactions) => {
     // calculate row 4 hash
     if (i % 2 != 0) {
       row4Hash.push(hash(row3Hashes[i - 1] + row3Hashes[i]));
+      merkleRoot = row4Hash[0];
       Anime.createTreeLines(widthNum, i - 1, row3Hashes.length, 3);
     }
   }
@@ -486,21 +507,42 @@ const littleEndian2 = hexStr => {
 };
 
 const calculateTarget = (bitsHex, sliderVal) => {
-  let numZeros = 64 - parseInt(bitsHex.substr(0,2), 16) * 2;
-  bitsHex = bitsHex.slice(2);
-  while (bitsHex[0] === '0') {
+  // let numZeros = 64 - parseInt(bitsHex.substr(0,2), 16) * 2; // zeros to left of mantissa
+  // bitsHex = bitsHex.slice(2);
+  // while (bitsHex[0] === '0') {
+  //   numZeros++;
+  //   bitsHex = bitsHex.slice(1);
+  // }
+  // numZeros = Math.round(numZeros * (sliderVal / 100));
+  // const mantissa = Math.round((parseInt(bitsHex, 16) * (sliderVal / 100))).toString(16);
+  // curBitsHex = bitsHex.substr(0,2) + mantissa.toString(16).padStart(4, '0');
+
+  // const targetHex = mantissa.padStart(mantissa.length + numZeros, '0').padEnd(64, '0');
+  // return targetHex;
+
+  let numZeros = 64 - parseInt(bitsHex.substr(0,2), 16) * 2; // zeros to left of mantissa
+
+  let mantissa = bitsHex.slice(2);
+  while (mantissa[0] === '0') {
     numZeros++;
-    bitsHex = bitsHex.slice(1);
+    mantissa = mantissa.slice(1);
   }
+
   numZeros = Math.round(numZeros * (sliderVal / 100));
-  const mantissa = Math.round((parseInt(bitsHex, 16) * (sliderVal / 100))).toString(16);
-  curBitsHex = bitsHex.substr(0,2) + mantissa.toString(16).padStart(4, '0');
+  let scaledMantissa = 
+    Math.round((parseInt(mantissa, 16) * 
+    (100 / sliderVal))).toString(16).slice(0, 6);
 
-  const targetHex = mantissa.padStart(mantissa.length + numZeros, '0').padEnd(64, '0');
+  let exponent = 64 - numZeros;
+  if (exponent % 2 !== 0) {
+    exponent++;
+    scaledMantissa = scaledMantissa.slice(0, -1);
+  }
+  curBitsHex = 
+    (exponent / 2).toString(16).padStart(2, '0') + scaledMantissa.padStart(6, '0');
+
+  const targetHex = 
+    scaledMantissa.padStart(scaledMantissa.length + numZeros, '0').padEnd(64, '0');
+
   return targetHex;
-};
-
-const concatHeader = (version, prevHash, merkleRoot, timeStamp, bitsHex, nonce) => {
-  const nonceHex = nonce.toString(16);
-  return nonceHex + bitsHex + timeStamp + merkleRoot + prevHash + version;
 };
