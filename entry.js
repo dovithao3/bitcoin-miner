@@ -33,9 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
   tutorials();
   populateTransactionsText(transactions);
   
-  // mining page
+  // mining page elements
   const versionEl = document.getElementById('version');
-  const pevHashEl = document.getElementById('prevHash');
+  const prevHashEl = document.getElementById('prevHash');
   const merkleRootEl = document.getElementById('merkleRoot');
   const timeStampEl = document.getElementById('timeStamp');
   const bitsHexEl = document.getElementById('bits');
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // const bits0 = 486604799; // decimal representation of block 0 bits
   const bits = 402698477; // block #498263 bits (2017-12-08 18:02:28)
   let bitsHex = bits.toString(16);
-  let sliderVal = 100;
+  let sliderVal = 9;
   let target = calculateTarget(bitsHex, sliderVal);
 
   // get latest block information
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return $.ajax({url: `https://blockexplorer.com/api/block/${hash}`});
     })
     .then(block => {
-      console.log(block);
+      // console.log(block);
       BLOCK_REWARD = block.reward;
       version = block.version.toString(16);
       bitsHex = block.bits;
@@ -78,13 +78,13 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(render);
   });
 
-  let nonce = 0, bestNonce, bestHash, miningOn = true; // actual nonce = 2083236893
+  let nonce = 0, bestNonce, bestHash, miningOn = false;
   
-  // start/pause buttons
-  const restartMiningButton = document.getElementById('restart-mining');
+  // start/pause button
   const pauseMiningButton = document.getElementById('pause-mining');
-  restartMiningButton.addEventListener('click', () => requestAnimationFrame(mine));
   pauseMiningButton.addEventListener('click', () => pauseMining());
+
+  populateMiningText();
   
   // start one iteration
   render();
@@ -100,9 +100,11 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('tut-7').classList.remove('hidden');
     }
   });
-  restartMiningButton.addEventListener('click', () => {
+  pauseMiningButton.addEventListener('click', () => {
     document.getElementById('tut-6').classList.add('hidden');
     document.getElementById('tut-7').classList.add('hidden');
+    pauseMiningButton.textContent = 
+      pauseMiningButton.textContent == 'Start!' ? 'Pause' : 'Start!'
   });
 
   function mine() {
@@ -115,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function render() {
     versionEl.textContent = version;
-    pevHashEl.innerHTML = `<p><a href='https://blockchain.info/block/${prevHash}'
+    prevHashEl.innerHTML = `<p><a href='https://blockchain.info/block/${prevHash}'
       target='_blank'>${prevHash}</a></p>`;
     merkleRootEl.textContent = merkleRoot;
     timeStampEl.textContent = `${timeStamp} (${datetime})`;
@@ -222,6 +224,56 @@ function populateMerkleText(transactions, row2Hashes) {
   document.getElementById('qm-6-detail').textContent = 
   `If there is ever an odd number of hashes in a row, the last hash is concatenated
   with itself and then double hashed`;
+}
+
+function populateMiningText() {
+  document.getElementById('qm-7-detail').textContent = 
+  'Block version as specified by Bitcoin Core';
+
+  document.getElementById('qm-8-detail').textContent = 
+  `The hash of the previous block to be mined. Notice that this means all blocks
+  are linked, and any change to a previous block would necessarily change all
+  future block hashes`;
+
+  document.getElementById('qm-9-detail').textContent = 
+  `A single value that represents all of the transactional data contained
+  in the current block. It was calculated in the previous step`;
+
+  document.getElementById('qm-10-detail').textContent = 
+  `The current UTC time (only needs to be accurate to within 2 hours)`;
+
+  document.getElementById('qm-11-detail').textContent = 
+  `The default difficulty has been reduced to 9% of actual difficulty! Slide
+  it to 100% to simulate the actual difficulty of the previous block (Warning:
+  will never complete in a reasonable time using a personal computer!)`;
+
+  document.getElementById('qm-12-detail').textContent = 
+  `A compact representation of the Target hash. The first byte is the exponent,
+  while the last 3 bytes are the mantissa (hexadecimal). The blockchain 
+  self-adjusts difficulty every 2016 blocks so that a new block is mined every 
+  10 minutes on average`;
+
+  document.getElementById('qm-13-detail').textContent = 
+  `A Nonce has no meaning and is simply a random number used to produce a
+  different hash output. Miners keep trying different nonces until the
+  Current Hash is less than the Target Hash`;
+
+  document.getElementById('qm-14-detail').textContent = 
+  `The current output of double hashing the concatenation of Version + Previous
+  Block Hash + Merkle Root + Timestamp + Bits + Nonce. This changes every time
+  a new Nonce is selected (since a change in input will change the output)`;
+
+  document.getElementById('qm-15-detail').textContent = 
+  `Your current block hash needs to be LESS than this value in order to be
+  considered successfully mined.`;
+
+  document.getElementById('qm-16-detail').textContent = 
+  `The Nonce that has produced the smallest Block Hash so far`;
+
+  document.getElementById('qm-17-detail').textContent = 
+  `The smallest Block Hash found so far. As soon as this value is less than
+  the Target Hash, the block has been successfully mined and the miner will
+  transmit the results to the network for consensus and receive the mining reward!`;
 }
 
 function transactionStream(transactions, drawMerkleButton) {
@@ -351,6 +403,9 @@ function calculateTxFees(transactions) {
 const drawMerkleTree = (btcs, transactions) => {
   btcs.send(JSON.stringify({op: 'unconfirmed_unsub'})); // close web socket
 
+  // DEBUG ONLY 
+  document.getElementById('start-mining').classList.remove('vis-hidden');
+
   // get and reset each row's ul element
   const row1 = document.getElementById('merkle-row-1');
   row1.innerHTML = '';
@@ -478,6 +533,7 @@ const hideMerkleModal = merkleModelEl => {
   merkleModelEl.classList.add('hidden');
   document.querySelector('.mining-container').classList.remove('hidden');
   document.querySelector('.main-content').classList.remove('hidden');
+  Anime.animateMiningPage();
 };
 
 function hash(hexString) {
@@ -507,19 +563,6 @@ const littleEndian2 = hexStr => {
 };
 
 const calculateTarget = (bitsHex, sliderVal) => {
-  // let numZeros = 64 - parseInt(bitsHex.substr(0,2), 16) * 2; // zeros to left of mantissa
-  // bitsHex = bitsHex.slice(2);
-  // while (bitsHex[0] === '0') {
-  //   numZeros++;
-  //   bitsHex = bitsHex.slice(1);
-  // }
-  // numZeros = Math.round(numZeros * (sliderVal / 100));
-  // const mantissa = Math.round((parseInt(bitsHex, 16) * (sliderVal / 100))).toString(16);
-  // curBitsHex = bitsHex.substr(0,2) + mantissa.toString(16).padStart(4, '0');
-
-  // const targetHex = mantissa.padStart(mantissa.length + numZeros, '0').padEnd(64, '0');
-  // return targetHex;
-
   let numZeros = 64 - parseInt(bitsHex.substr(0,2), 16) * 2; // zeros to left of mantissa
 
   let mantissa = bitsHex.slice(2);

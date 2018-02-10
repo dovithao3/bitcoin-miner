@@ -147,3 +147,110 @@ export const animateMerkleTree = (transactions, row2Hashes, row1, row2, row3, ro
 
     return promise;
 }
+
+export const animateMiningPage = () => {
+  const miningLabelsEl = document.querySelector('.mining-labels');
+  const versionEl = document.getElementById('version-float');
+  const prevHashEl = document.getElementById('prev-hash-float');
+  const merkleRootEl = document.getElementById('merkle-root-float');
+  const timeStampEl = document.getElementById('timestamp-float');
+  const bitsHexEl = document.getElementById('bits-float');
+  const nonceHexEl = document.getElementById('nonce-float');
+  const currentHashEl = document.getElementById('current-hash-float');
+
+  const plusSigns = document.createElement('div');
+  plusSigns.id = 'plus-signs';
+  for (let i = 0; i < 5; i++) {
+    const plusSign = document.createElement('span');
+    plusSign.textContent = '+';
+    plusSigns.appendChild(plusSign);
+  }
+  miningLabelsEl.appendChild(plusSigns);
+
+  const sha256Text = document.createElement('pre');
+  sha256Text.id = 'sha256-text-mining';
+  sha256Text.textContent = 'SHA-256( SHA-256(                      ))';
+  miningLabelsEl.appendChild(sha256Text);
+
+  const duration = 4000, easing = 'easeInOutQuad';
+
+  const promise = anime.timeline()
+    .add({
+      targets: [versionEl, prevHashEl, merkleRootEl, timeStampEl, bitsHexEl, nonceHexEl],
+      translateX: function(el, i) {
+        switch (i) {
+          case 0:
+            return 330;
+          case 1:
+            return 390;
+          case 2:
+            return 350;
+          case 3:
+            return 340;
+          case 4:
+            return 380;
+          case 5:
+            return 320;
+        }
+      },
+      translateY: function(el, i) {
+        switch (i) {
+          case 0:
+            return 20;
+          case 1:
+            return 40;
+          case 2:
+            return 60;
+          case 3:
+            return 80;
+          case 4:
+            return 65;
+          case 5:
+            return 85;
+        }
+      },
+      duration,
+      easing,
+    })
+    .add({
+      targets: [plusSigns, sha256Text],
+      opacity: 1,
+      duration: 2000,
+      delay: 1000
+    })
+    .add({
+      targets: [versionEl, prevHashEl, merkleRootEl, timeStampEl, bitsHexEl, 
+        nonceHexEl, plusSigns, sha256Text],
+        opacity: 0,
+        color: '#000',
+        duration: 1500,
+        delay: 1000
+    })
+    .add({
+      targets: currentHashEl,
+      opacity: 1,
+      duration: 500,
+    })
+    .add({
+      targets: currentHashEl,
+      translateX: -343,
+      translateY: 63,
+      duration: 2000,
+      delay: 2000,
+      easing,
+    });
+
+  promise.finished.then(() => {
+    document.querySelector('.mining-values').classList.remove('vis-hidden');
+    document.getElementById('pause-mining').classList.remove('vis-hidden');
+  });
+
+  // anime.timeline()
+  //   .add({
+  //     targets: pevHashEl,
+  //     translateX: 163,
+  //     translateY: 25,
+  //     duration,
+  //     easing,
+  //   })
+}

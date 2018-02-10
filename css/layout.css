@@ -31,10 +31,24 @@ h1 {
   font-weight: 700;
 }
 
-h3 {
+h3, .ml {
+  position: relative;
   font-size: 20px;
   font-weight: 500;
   line-height: 29px;
+}
+
+#current-hash-float {
+  position: absolute;
+  top: 281px;
+  left: 413px;
+  opacity: 0;
+}
+
+.absolute {
+  position: absolute;
+  top: 0px;
+  opacity: 1;
 }
 
 h4 {
@@ -284,6 +298,17 @@ path {
   font-size: 20px;
 }
 
+#plus-signs {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  left: 480px;
+  top: 177px;
+  opacity: 0;
+  font-size: 20px;
+  line-height: 48px;
+}
+
 #sha256-text {
   position: absolute;
   top: 155px;
@@ -291,6 +316,15 @@ path {
   opacity: 0;
   color: white;
   font-size: 40px;
+}
+
+#sha256-text-mining {
+  position: absolute;
+  top: 285px;
+  left: 202px;
+  opacity: 0;
+  color: black;
+  font-size: 20px;
 }
 
 .mining-container {
@@ -348,10 +382,11 @@ img.logo-usd {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  margin-right: 10px;
+  margin-right: 25px;
 }
 
 .mining-values {
+  position: relative;
   display: flex;
   flex-direction: column;
 }
@@ -466,6 +501,8 @@ img.logo-usd {
   background-color: orange;
   opacity: .95;
   z-index: 4;
+  left: 20px;
+  top: 0px;
 }
 
 .qm-div:hover .qm-detail {
@@ -499,4 +536,59 @@ img.logo-usd {
 #qm-6-div {
   top: 310px;
   left: 663px;
+}
+
+#qm-7-div {
+  top: 145px;
+  left: 192px;
+}
+
+#qm-8-div {
+  top: 174px;
+  left: 192px;
+}
+
+#qm-9-div {
+  top: 203px;
+  left: 192px;
+}
+
+#qm-10-div {
+  top: 232px;
+  left: 192px;
+}
+
+#qm-11-div {
+  top: 261px;
+  left: 192px;
+}
+
+#qm-12-div {
+  top: 290px;
+  left: 192px;
+}
+
+#qm-13-div {
+  top: 319px;
+  left: 192px;
+}
+
+#qm-14-div {
+  top: 348px;
+  left: 192px;
+}
+
+#qm-15-div {
+  top: 377px;
+  left: 192px;
+}
+
+#qm-16-div {
+  top: 406px;
+  left: 192px;
+}
+
+#qm-17-div {
+  top: 435px;
+  left: 192px;
 }

@@ -18,39 +18,102 @@
       <h2>Bitcoin Miner</h2>
 
       <div>
-      <button id='restart-mining'>Go!</button>
-      <button id='pause-mining'>Pause/Restart</button>
+      <button id='pause-mining' class='vis-hidden'>Start!</button>
       </div>
       
       <div class='mining-data'>
         <div class='mining-labels'>
-          <h3>Current Block Hash</h3>
-          <h3>Target</h3>
-          <h3>Version</h3>
-          <h3>Previous Block Hash</h3>
-          <h3>Merkle Root</h3>
-          <h3>Timestamp</h3>
-          <h3>Difficulty Slider</h3>
-          <h3>Bits (Difficulty)</h3>
-          <h3>Nonce</h3>
-          <h3>Current Hash</h3>
-          <h3>Best Nonce</h3>
+          <span class='ml'>Version
+            <h3 id='version-float' class='absolute'>Version</h3>
+          </span>
+          
+          <span class='ml'h3>Previous Block Hash
+              <h3 id='prev-hash-float' class='absolute'>Previous Block Hash</h3>
+          </span>
+          
+          <span class='ml'>Merkle Root
+            <h3 id='merkle-root-float' class='absolute'>Merkle Root</h3>
+          </span>
+
+          <span class='ml'>Timestamp
+            <h3 id='timestamp-float' class='absolute'>Timestamp</h3>
+          </span>
+
+          <span class='ml'>Difficulty Slider</span>
+          <span class='ml'>Bits (Difficulty)
+            <h3 id='bits-float' class='absolute'>Bits (Difficulty)</h3>
+          </span>
+
+          <span class='ml'>Nonce
+            <h3 id='nonce-float' class='absolute'>Nonce</h3>
+          </span>
+
+          <span class='ml'>Current Hash</span>
+          <span class='ml'>Target</span>
+          <span class='ml'>Best Nonce</span>
+          <span class='ml'>Current Block Hash</span>
+
+          <h3 id='current-hash-float' class='absolute'>Current Hash</h3>
+          <div class='qm-div' id='qm-7-div'>
+            <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
+            <div class='qm-detail' id='qm-7-detail'></div>
+          </div>
+          <div class='qm-div' id='qm-8-div'>
+            <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
+            <div class='qm-detail' id='qm-8-detail'></div>
+          </div>
+          <div class='qm-div' id='qm-9-div'>
+            <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
+            <div class='qm-detail' id='qm-9-detail'></div>
+          </div>
+          <div class='qm-div' id='qm-10-div'>
+            <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
+            <div class='qm-detail' id='qm-10-detail'></div>
+          </div>
+          <div class='qm-div' id='qm-11-div'>
+            <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
+            <div class='qm-detail' id='qm-11-detail'></div>
+          </div>
+          <div class='qm-div' id='qm-12-div'>
+            <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
+            <div class='qm-detail' id='qm-12-detail'></div>
+          </div>
+          <div class='qm-div' id='qm-13-div'>
+            <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
+            <div class='qm-detail' id='qm-13-detail'></div>
+          </div>
+          <div class='qm-div' id='qm-14-div'>
+            <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
+            <div class='qm-detail' id='qm-14-detail'></div>
+          </div>
+          <div class='qm-div' id='qm-15-div'>
+            <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
+            <div class='qm-detail' id='qm-15-detail'></div>
+          </div>
+          <div class='qm-div' id='qm-16-div'>
+            <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
+            <div class='qm-detail' id='qm-16-detail'></div>
+          </div>
+          <div class='qm-div' id='qm-17-div'>
+            <img class='qm' src="https://s3-us-west-1.amazonaws.com/bitcoinminer-pro/b28b71ed6a6b6cb07d0476aeb73b8b37.png" alt="Question Mark Icon">
+            <div class='qm-detail' id='qm-17-detail'></div>
+          </div>
         </div>
         
-        <div class='mining-values'>
-          <p id='bestHash'>0</p>
-          <p id='target'></p>
+        <div class='mining-values vis-hidden'>
           <p id='version'></p>
           <p id='prevHash'></p>
           <p id='merkleRoot'></p>
           <p id='timeStamp'></p>
           <div id="slidecontainer">
-            <input type="range" min="1" max="100" value="100" class="slider">
+            <input type="range" min="1" max="100" value="9" class="slider">
           </div>
           <p id='bits'></p>
           <p id='nonce'></p>
           <p id='currentHash'>0</p>
+          <p id='target'></p>
           <p id='bestNonce'>0</p>
+          <p id='bestHash'>0</p>
         </div>
       </div>
 
