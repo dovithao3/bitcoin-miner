@@ -243,14 +243,7 @@ export const animateMiningPage = () => {
   promise.finished.then(() => {
     document.querySelector('.mining-values').classList.remove('vis-hidden');
     document.getElementById('pause-mining').classList.remove('vis-hidden');
+    document.getElementById('tut-4').classList.remove('hidden');
+    document.getElementById('tut-5').classList.remove('hidden');
   });
-
-  // anime.timeline()
-  //   .add({
-  //     targets: pevHashEl,
-  //     translateX: 163,
-  //     translateY: 25,
-  //     duration,
-  //     easing,
-  //   })
 }

@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // start drawing transactions modal
   const drawMerkleButton = document.getElementById('calc-merkle');
   transactionStream(transactions, drawMerkleButton);
+  document.getElementById('start-mining').addEventListener('click', () => renderOnce());
   calculatePaymentTx(transactions); // fills first transaction
   drawTxList(transactions);
   const startStreamButton = document.getElementById('start-stream');
@@ -86,23 +87,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   populateMiningText();
   
-  // start one iteration
-  render();
-  hashHeader(false); 
-  document.getElementById('tut-4').classList.remove('hidden');
-  document.getElementById('tut-5').classList.remove('hidden');
-  document.querySelector('.slider').addEventListener('change', () => {
-    const tut4 = document.getElementById('tut-4');
-    if (!tut4.classList.contains('hidden')) {
-      tut4.classList.add('hidden');
-      document.getElementById('tut-5').classList.add('hidden');
-      document.getElementById('tut-6').classList.remove('hidden');
-      document.getElementById('tut-7').classList.remove('hidden');
-    }
-  });
+  // start one iteration to populate initial data
+  function renderOnce() {
+    render();
+    hashHeader(false);
+  }
+
+  // start/pause button behavior
   pauseMiningButton.addEventListener('click', () => {
-    document.getElementById('tut-6').classList.add('hidden');
-    document.getElementById('tut-7').classList.add('hidden');
+    document.getElementById('tut-4').classList.add('hidden');
+    document.getElementById('tut-5').classList.add('hidden');
     pauseMiningButton.textContent = 
       pauseMiningButton.textContent == 'Start!' ? 'Pause' : 'Start!'
   });
@@ -144,6 +138,10 @@ document.addEventListener('DOMContentLoaded', () => {
       pauseMining();
       document.querySelector('.reward').classList.add('reward-border');
       document.querySelector('h4').classList.remove('hidden');
+
+      // reload page when clicked
+      pauseMiningButton.textContent = 'Restart!'
+      pauseMiningButton.addEventListener('click', () => location.reload(true));
     }
   }
 
@@ -158,34 +156,26 @@ function tutorials() {
   const tut1 = Tutorial.createBubble(1, 'right', '30px', '310px', '90px', '145px',
     `Add ${MAX_TX - 1} unconfirmed transactions to your block`);
     document.querySelector('.transactions-container').appendChild(tut1);
+
   const tut2 = Tutorial.createBubble(2, 'right', '600px', '360px', '95px', '222px',
     `These 8 transaction hashes will be used to construct a Merkle Tree in the 
     next step`);
     document.querySelector('.tx-list-container').appendChild(tut2);
+
   const tut3 = Tutorial.createBubble(3, 'right', '38px', '540px', '140px', '250px',
     `The final result of double hashing every pair of transaction hashes is 
     called the "Merkle Root" of the block and is used in the next step`);
     document.querySelector('.merkle-tree-container').appendChild(tut3);
-  const tut4 = Tutorial.createBubble(4, 'left', '133px', '-220px', '310px', '260px',
+
+  const tut4 = Tutorial.createBubble(4, 'left', '282px', '-237px', '238px', '220px',
     `In order to succesfully mine this block and claim your reward, you must find
-    a block hash that is less than the "Target", which is determined by the block's
-    difficulty (or "bits"). The blockchain self-adjusts difficulty every 2016 blocks
-    so that a new block is mined every 10 minutes on average.`);
+    a block hash that is less than the "Target". Therefore, you simply try 
+    different nonces until Current Hash < Target`);
     document.querySelector('.mining-container').appendChild(tut4);
-  const tut5 = Tutorial.createBubble(5, 'right', '280px', '687px', '215px', '220px',
-    `Adjust this difficulty slider to make things easier for yourself than real
-    miners! Notice the "Target" increasing as you decrease difficulty. 
-    (Recommended: ~9%)`);
+
+  const tut5 = Tutorial.createBubble(5, 'left', '50px', '-24px', '75px', '220px',
+    `Press "Go!" when you are ready to start mining!`);
     document.querySelector('.mining-container').appendChild(tut5);
-  const tut6 = Tutorial.createBubble(6, 'left', '340px', '-220px', '213px', '260px',
-    `Your "Current Hash" is calculated as follows: SHA-256 (SHA-256 ( 
-    Version + Previous Block Hash + Merkle Root + Timestamp + Bits + Nonce)) 
-    Therefore, you simply try different nonces until Current Hash < Target`);
-    document.querySelector('.mining-container').appendChild(tut6);
-  const tut7 = Tutorial.createBubble(7, 'left', '61px', '-155px', '142px', '220px',
-    `Press "Go!" when you are ready to start mining! The "Current Block Hash"
-    is the smallest Hash you have computed so far`);
-    document.querySelector('.mining-container').appendChild(tut7);
 }
 
 function populateTransactionsText() {
@@ -280,7 +270,9 @@ function transactionStream(transactions, drawMerkleButton) {
   const btcs = new WebSocket('wss://ws.blockchain.info/inv');
   btcs.onopen = () => btcs.send(JSON.stringify({op: 'unconfirmed_sub'}));
 
-  drawMerkleButton.addEventListener('click', () => drawMerkleTree(btcs, transactions));
+  drawMerkleButton.addEventListener('click', () => {
+    drawMerkleTree(btcs, transactions);
+  });
   const stopStreamButton = document.getElementById('stop-stream');
   stopStreamButton.addEventListener('click', () => {
     btcs.send(JSON.stringify({op: 'unconfirmed_unsub'}));
@@ -404,7 +396,7 @@ const drawMerkleTree = (btcs, transactions) => {
   btcs.send(JSON.stringify({op: 'unconfirmed_unsub'})); // close web socket
 
   // DEBUG ONLY 
-  document.getElementById('start-mining').classList.remove('vis-hidden');
+  // document.getElementById('start-mining').classList.remove('vis-hidden');
 
   // get and reset each row's ul element
   const row1 = document.getElementById('merkle-row-1');
